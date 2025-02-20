@@ -1,0 +1,18 @@
+general:
+  sftp:
+    host: sftp.datalakes.org
+    port: 22
+    prefix: data
+    credentials:
+      username: test
+      password: test
+  logs:
+    path: logs
+instruments:
+  - name: instrument1
+    schedule:
+      cron: "0 0 * * *" # every day at midnight
+    input:
+      path: instrument1/data
+    output:
+      path: instrument1

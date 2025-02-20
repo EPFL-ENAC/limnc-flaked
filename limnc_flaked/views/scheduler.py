@@ -22,3 +22,7 @@ async def set_status(
     else:
         raise HTTPException(status_code=400, detail="Invalid action.")
     return {"status": scheduler_service.get_status()}
+
+@router.get("/jobs")
+async def get_status():
+    return scheduler_service.get_jobs()

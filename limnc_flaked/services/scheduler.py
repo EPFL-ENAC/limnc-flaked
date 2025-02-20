@@ -31,8 +31,8 @@ class SchedulerService:
 
   # Schedule the pipeline
   def start(self):
-      self.scheduler.add_job(process_data, 'interval', minutes=1)  # Run every minute
       self.scheduler.start()
+      self.scheduler.add_job(process_data, 'interval', minutes=1, id="1", replace_existing=True)  # Run every minute
       self.status = "running"
 
   def stop(self):
@@ -52,6 +52,34 @@ class SchedulerService:
   
   def get_status(self):
       return self.status
+
+  def job_to_dict(self, job):
+    job_dict = {
+        'id': job.id,
+        'name': job.name,
+        'trigger': {},
+        'next_run_time': str(job.next_run_time),
+        'func': job.func.__name__,
+        'args': job.args,
+        'kwargs': job.kwargs,
+        'misfire_grace_time': job.misfire_grace_time,
+        'coalesce': job.coalesce,
+        'max_instances': job.max_instances
+    }
+
+    # Add trigger-specific details
+    trigger = job.trigger
+    if hasattr(trigger, 'interval'):
+        job_dict['trigger']['interval'] = trigger.interval.total_seconds()
+    if hasattr(trigger, 'fields'):  # For cron triggers
+        job_dict['trigger']['cron'] = {f.name: str(f) for f in trigger.fields}
+    if hasattr(trigger, 'run_date'):  # For date triggers
+        job_dict['trigger']['date'] = str(trigger.run_date)
+    return job_dict
+
+  def get_jobs(self):
+      jobs = self.scheduler.get_jobs()
+      return [self.job_to_dict(job) for job in jobs]
     
 
 scheduler_service = SchedulerService()

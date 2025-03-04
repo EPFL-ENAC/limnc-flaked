@@ -3,7 +3,8 @@ from fastapi import APIRouter, HTTPException
 from ..services.config import config_service
 from ..services.scheduler import scheduler_service
 from ..models.domain import Config, InstrumentConfig
-
+import os
+cwd = os.getcwd()
 router = APIRouter()
 
 
@@ -15,6 +16,16 @@ async def get_config() -> Config:
         Config: The general and the instruments configurations
     """
     return config_service.get_config()
+
+
+@router.get("/cwd")
+async def get_config() -> dict:
+    """Get the system configuration
+
+    Returns:
+        Config: The general and the instruments configurations
+    """
+    return {'dir': os.getcwd()}
 
 
 @router.get("/instruments", response_model_exclude_none=True)

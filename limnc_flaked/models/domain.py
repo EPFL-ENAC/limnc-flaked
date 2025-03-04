@@ -32,6 +32,7 @@ class GeneralConfig(BaseModel):
     """
     sftp: SFTPConfig
     logs: LogsConfig
+    work: str = Field(default=None)
     attempts: int = Field(default=3)
     wait: int = Field(default=5)
 

@@ -25,6 +25,7 @@ class UploadService:
 
         # Ensure remote folder exists (create if necessary)
         remote_folder = self.sftp_config.prefix + '/' + remote_path
+        self._mkdirs(sftp, remote_folder)
         try:
             sftp.stat(remote_folder)  # Check if remote folder exists
         except FileNotFoundError:
@@ -44,3 +45,16 @@ class UploadService:
             sftp.close()
             client.close()
         return uploaded
+
+    def _mkdirs(self, sftp, remote_folder):
+        """ Recursively create directories on the remote SFTP server """
+        dirs = remote_folder.strip("/").split("/")
+        current_path = ""
+
+        for dir in dirs:
+            current_path += f"/{dir}"
+            try:
+                sftp.stat(current_path)  # Check if directory exists
+            except FileNotFoundError:
+                sftp.mkdir(current_path)  # Create if it doesn't exist
+                print(f"Created remote directory: {current_path}")

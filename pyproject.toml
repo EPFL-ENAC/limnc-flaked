@@ -13,11 +13,11 @@ flaked = "limnc_flaked.cli:cli"
 python = "^3.10"
 apscheduler = "^3.11.0"
 fastapi = "^0.115.8"
-pysftp = "^0.2.9"
 pyyaml = "^6.0.2"
 typer = "^0.15.1"
 uvicorn = "^0.34.0"
 tenacity = "^9.0.0"
+paramiko = "^3.5.1"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -32,7 +32,7 @@ class JobProcessor:
         print(f"Step 1: Extracting files from {self.instrument.input.path}...")
 
         # Get folder path
-        source = self._to_absolute_path(self.instrument.input.path)
+        source = self._get_source(self.instrument.input.path)
         if not source.exists():
             print(f"Source folder {source} does not exist")
             return []
@@ -61,7 +61,7 @@ class JobProcessor:
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def upload_files(self, files):
         print(
-            f"Step 2: Uploading {len(files)} data file to {self.config.general.sftp.username}@{self.config.general.sftp.host}:{self.instrument.output.path}...")
+            f"Step 2: Uploading {len(files)} data file to {self.config.general.sftp.username}@{self.config.general.sftp.host}:{self.config.general.sftp.prefix}/{self.instrument.name}...")
         if len(files) == 0:
             print("No files to upload")
             return []
@@ -75,7 +75,7 @@ class JobProcessor:
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def move_files(self, files):
         print(f"Step 3: Moving data file to {self.instrument.output.path}...")
-        destination = self._to_absolute_path(self.instrument.output.path)
+        destination = self._get_destination(self.instrument.output.path)
         if destination.exists() and not destination.is_dir():
             print(f"Destination {destination} is not a directory")
             return
@@ -88,8 +88,14 @@ class JobProcessor:
         for file in files:
             file.rename(destination / file.name)
 
-    def _to_absolute_path(self, file: str) -> Path:
+    def _get_source(self, file: str) -> Path:
         path = Path(file)
         if path.is_absolute():
             return path
-        return Path(self.config.general.work if self.config.general.work else os.getcwd()) / file
+        return Path(self.config.general.input if self.config.general.input else os.getcwd()) / file
+
+    def _get_destination(self, file: str) -> Path:
+        path = Path(file)
+        if path.is_absolute():
+            return path
+        return Path(self.config.general.output if self.config.general.output else os.getcwd()) / file

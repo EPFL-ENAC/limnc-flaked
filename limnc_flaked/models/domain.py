@@ -32,7 +32,8 @@ class GeneralConfig(BaseModel):
     """
     sftp: SFTPConfig
     logs: LogsConfig
-    work: str = Field(default=None)
+    input: str = Field(default=None)   # Input folder prefix
+    output: str = Field(default=None)  # Output folder prefix
     attempts: int = Field(default=3)
     wait: int = Field(default=5)
 

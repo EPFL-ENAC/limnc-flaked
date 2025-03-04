@@ -7,6 +7,8 @@ general:
     password: test
   logs:
     path: logs
+  input: work/instruments
+  output: work/backup
 instruments:
   - name: instrument1
     schedule:
@@ -16,6 +18,8 @@ instruments:
         unit: minutes
     input:
       path: instrument1/data
+      filter:
+        skip: 1
     output:
       path: instrument1
   - name: instrument2
@@ -26,5 +30,7 @@ instruments:
         unit: minutes
     input:
       path: instrument2/data
+      filter:
+        regex: ".*\\.csv"
     output:
       path: instrument2

@@ -42,6 +42,7 @@ class TimeUnit(str, Enum):
     minutes = "minutes"
     hours = "hours"
     days = "days"
+    weeks = "weeks"
 
 
 class Interval(BaseModel):

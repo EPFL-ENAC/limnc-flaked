@@ -50,5 +50,5 @@ app.include_router(
 app.include_router(
     config_router,
     prefix="/config",
-    tags=["Config"],
+    tags=["Configuration"],
 )

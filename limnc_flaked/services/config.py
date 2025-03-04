@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
 import os
-from ..models.domain import Config
+from ..models.domain import Config, InstrumentConfig
 
 
 class ConfigService:
@@ -21,11 +21,37 @@ class ConfigService:
     def get_config(self) -> Config:
         return self.config
 
-    def get_instrument_config(self, name: str) -> Config:
+    def get_instrument_config(self, name: str) -> InstrumentConfig:
         for inst in self.config.instruments:
             if inst.name == name:
                 return inst
         return None
+
+    def update_config(self, config: Config):
+        with open(self.config_file, 'w') as f:
+            yaml.dump(config.model_dump(), f)
+
+    def update_instrument_config(self, instrument: InstrumentConfig):
+        for inst in self.config.instruments:
+            if inst.name == instrument.name:
+                inst = instrument
+                break
+        self.update_config(self.config)
+
+    def delete_instrument_config(self, name: str):
+        self.config.instruments = [
+            inst for inst in self.config.instruments if inst.name != name]
+        self.update_config(self.config)
+
+    def add_instrument_config(self, instrument: InstrumentConfig):
+        self.config.instruments.append(instrument)
+        self.update_config(self.config)
+
+    def add_or_update_instrument_config(self, instrument: InstrumentConfig):
+        if self.get_instrument_config(instrument.name) == None:
+            self.add_instrument_config(instrument)
+        else:
+            self.update_instrument_config(instrument)
 
 
 config_path = None

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "limnc-flaked"
+name = "flaked"
 version = "0.1.0"
 description = "LéXPLORE datalakes (service)"
 authors = ["ymarcon <yannick.marcon@epfl.ch>"]
@@ -7,7 +7,7 @@ license = "GPLv3"
 readme = "README.md"
 
 [tool.poetry.scripts]
-flaked = "limnc_flaked.cli:cli"
+flaked = "flaked.cli:cli"
 
 [tool.poetry.dependencies]
 python = "^3.10"

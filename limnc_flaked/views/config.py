@@ -2,34 +2,34 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from ..services.config import config_service
 from ..services.scheduler import scheduler_service
-from ..models.domain import Config, InstrumentConfig
+from ..models.domain import GeneralConfig, InstrumentConfig
 import os
 cwd = os.getcwd()
 router = APIRouter()
 
 
-@router.get("/", response_model_exclude_none=True)
-async def get_config() -> Config:
-    """Get the system configuration
+@router.get("/general", response_model_exclude_none=True)
+async def get_general_config() -> GeneralConfig:
+    """Get the general configuration
 
     Returns:
-        Config: The general and the instruments configurations
+        GeneralConfig: The general configuration
     """
-    return config_service.get_config()
+    return config_service.get_config().general
 
 
-@router.get("/cwd")
-async def get_config() -> dict:
-    """Get the system configuration
+@router.get("/runtime")
+async def get_runtime() -> dict:
+    """Get some runtime information
 
     Returns:
-        Config: The general and the instruments configurations
+        dict: The current working directory etc.
     """
-    return {'dir': os.getcwd()}
+    return {'cwd': os.getcwd(), 'config_path': config_service.config_file}
 
 
 @router.get("/instruments", response_model_exclude_none=True)
-async def get_config() -> List[InstrumentConfig]:
+async def get_instruments_config() -> List[InstrumentConfig]:
     """Get the instrument configurations
 
     Returns:

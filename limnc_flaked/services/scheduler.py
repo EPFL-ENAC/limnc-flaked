@@ -87,7 +87,7 @@ class SchedulerService:
             trigger = CronTrigger.from_crontab(instrument.schedule.cron)
         if trigger:
             self.scheduler.add_job(
-                process_data, trigger, id=instrument.name, kwargs={"job_id": instrument.name}, replace_existing=True)
+                process_data, trigger, id=instrument.name, name=instrument.name, kwargs={"job_id": instrument.name}, replace_existing=True)
 
     def job_to_dict(self, job) -> dict:
         job_dict = {

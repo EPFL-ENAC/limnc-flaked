@@ -24,7 +24,7 @@ class IOConfig(BaseModel):
 class LogsConfig(IOConfig):
     """Where log files are to be found/written
     """
-    pass
+    level: str = Field(default='INFO')
 
 
 class GeneralConfig(BaseModel):

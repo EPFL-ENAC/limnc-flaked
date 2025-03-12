@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from ..services.config import config_service
 from ..services.scheduler import scheduler_service
 from ..models.domain import GeneralConfig, InstrumentConfig

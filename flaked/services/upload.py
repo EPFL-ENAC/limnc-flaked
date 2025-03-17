@@ -1,4 +1,5 @@
 from typing import List
+from pathlib import Path
 import paramiko
 from .config import config_service
 
@@ -9,7 +10,7 @@ class UploadService:
         self.general_config = config_service.get_config().general
         self.sftp_config = self.general_config.sftp
 
-    def upload_files(self, files: List[str], remote_path: str):
+    def upload_files(self, files: List[Path], remote_path: str) -> List[Path]:
         uploaded = []
         # Create an SSH client
         client = paramiko.SSHClient()

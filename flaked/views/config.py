@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter
 from ..services.config import config_service
 from ..services.scheduler import scheduler_service
+from ..services.log import log_service
 from ..models.domain import GeneralConfig, InstrumentConfig
 import os
 cwd = os.getcwd()
@@ -64,6 +65,7 @@ async def get_instrument_config(name: str) -> InstrumentConfig:
     config = config_service.get_instrument_config(name)
     if scheduler_service.has_job(name):
         scheduler_service.stop_job(name)
+    log_service.clear(name)
     config_service.delete_instrument_config(name)
     return config
 
@@ -79,4 +81,5 @@ async def add_or_update_instrument_config(config: InstrumentConfig) -> Instrumen
         InstrumentConfig: The instrument configuration
     """
     config_service.add_or_update_instrument_config(config)
+    log_service.clear(config.name)
     return config_service.get_instrument_config(config.name)

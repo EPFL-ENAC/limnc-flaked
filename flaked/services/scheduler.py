@@ -62,6 +62,11 @@ class SchedulerService:
             self.add_job(job_id)
         self.scheduler.resume_job(job_id)
 
+    def run_job(self, job_id: str):
+        if self.scheduler.get_job(job_id) is None:
+            self.add_job(job_id)
+        process_data(job_id)
+
     def get_status(self):
         return self.status
 

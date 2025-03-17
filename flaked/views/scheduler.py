@@ -94,6 +94,16 @@ async def get_job_status(job_id: str) -> Status:
     return Status(status="running")
 
 
+@router.post("/job/{job_id}")
+async def run_job(
+    job_id: str,
+) -> Status:
+    if config_service.get_instrument_config(job_id) is None:
+        raise HTTPException(status_code=404, detail="Instrument not found.")
+    scheduler_service.run_job(job_id)
+    return await get_job_status(job_id)
+
+
 @router.put("/job/{job_id}/status")
 async def set_job_status(
     job_id: str,

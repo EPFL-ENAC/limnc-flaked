@@ -34,3 +34,6 @@ instruments:
         regex: ".*\\.csv"
     output:
       path: instrument2
+    logs:
+      path: logs/instrument2
+      level: DEBUG

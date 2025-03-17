@@ -26,6 +26,9 @@ class ConfigService:
     def get_config(self) -> Config:
         return self.config
 
+    def get_general_config(self) -> GeneralConfig:
+        return self.config.general
+
     def get_instrument_config(self, name: str) -> InstrumentConfig:
         for inst in self.config.instruments:
             if inst.name == name:

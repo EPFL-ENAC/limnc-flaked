@@ -3,6 +3,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from ..models.domain import InstrumentConfig
+from .config import config_service
 
 # Configure logging
 logging.basicConfig(
@@ -17,13 +18,28 @@ class InstrumentLogger:
     def __init__(self, inst_config: InstrumentConfig):
         self.inst_config = inst_config
         self.logger = logging.getLogger(inst_config.name)
-        if inst_config.logs and inst_config.logs.level == 'DEBUG':
-            self.logger.setLevel(logging.DEBUG)
+        default_logs_config = config_service.get_general_config().logs
+
+        # Log level
+        if inst_config.logs:
+            self.logger.setLevel(inst_config.logs.level)
+        elif default_logs_config:
+            self.logger.setLevel(default_logs_config.level)
         else:
             self.logger.setLevel(logging.INFO)
+
+        # Log file path
         log_path = f"{inst_config.name}.log"
-        if inst_config.logs and inst_config.logs.path:
+        if inst_config.logs:
             log_path = Path(inst_config.logs.path) / f"{inst_config.name}.log"
+        elif default_logs_config:
+            log_path = Path(default_logs_config.path) / \
+                f"{inst_config.name}.log"
+
+        if not log_path.parent.exists():
+            log_path.parent.mkdir(parents=True)
+
+        print(f"Logging to {log_path}")
         handler = RotatingFileHandler(
             log_path,         # Log file name
             maxBytes=1000000,  # 1 MB before rotation

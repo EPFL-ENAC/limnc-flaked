@@ -2,7 +2,7 @@ import logging
 import yaml
 from pathlib import Path
 from platformdirs import PlatformDirs
-from ..models.domain import Config, GeneralConfig, SFTPConfig, LogsConfig, InstrumentConfig
+from ..models.domain import Config, SystemConfig, SFTPConfig, LogsConfig, InstrumentConfig
 
 
 class ConfigService:
@@ -26,8 +26,8 @@ class ConfigService:
     def get_config(self) -> Config:
         return self.config
 
-    def get_general_config(self) -> GeneralConfig:
-        return self.config.general
+    def get_settings(self) -> SystemConfig:
+        return self.config.settings
 
     def get_instrument_config(self, name: str) -> InstrumentConfig:
         for inst in self.config.instruments:
@@ -66,9 +66,9 @@ class ConfigService:
             host="sftp.datalakes.org", port=22, prefix="data", username="user", password="changeme")
         logs_path = self._get_data_path() / "logs"
         logs_config = LogsConfig(path=str(logs_path), level="INFO")
-        general_config = GeneralConfig(
+        settings = SystemConfig(
             sftp=sft_config, logs=logs_config, input=None, output=None, attempts=3, wait=5)
-        default_config = Config(general=general_config, instruments=[])
+        default_config = Config(settings=settings, instruments=[])
         return default_config
 
     def _get_data_path(self):

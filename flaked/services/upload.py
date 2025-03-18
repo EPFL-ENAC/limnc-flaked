@@ -7,8 +7,7 @@ from .config import config_service
 class UploadService:
 
     def __init__(self):
-        self.general_config = config_service.get_config().general
-        self.sftp_config = self.general_config.sftp
+        self.sftp = config_service.get_config().settings.sftp
 
     def upload_files(self, files: List[Path], remote_path: str) -> List[Path]:
         uploaded = []
@@ -18,14 +17,14 @@ class UploadService:
             paramiko.AutoAddPolicy())  # Auto accept unknown host keys
 
         # Connect to the SFTP server
-        client.connect(self.sftp_config.host, self.sftp_config.port,
-                       self.sftp_config.username, self.sftp_config.password)
+        client.connect(self.sftp.host, self.sftp.port,
+                       self.sftp.username, self.sftp.password)
 
         # Open an SFTP session
         sftp = client.open_sftp()
 
         # Ensure remote folder exists (create if necessary)
-        remote_folder = self.sftp_config.prefix + '/' + remote_path
+        remote_folder = self.sftp.prefix + '/' + remote_path
         self._mkdirs(sftp, remote_folder)
         try:
             sftp.stat(remote_folder)  # Check if remote folder exists

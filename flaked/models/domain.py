@@ -27,7 +27,7 @@ class LogsConfig(IOConfig):
     level: str = Field(default='INFO')
 
 
-class GeneralConfig(BaseModel):
+class SystemConfig(BaseModel):
     """General system configuration
     """
     sftp: SFTPConfig
@@ -94,5 +94,5 @@ class InstrumentConfig(BaseModel):
 class Config(BaseModel):
     """Application configuration
     """
-    general: GeneralConfig
+    settings: SystemConfig
     instruments: List[InstrumentConfig]

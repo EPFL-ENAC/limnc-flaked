@@ -69,7 +69,7 @@ class JobProcessor:
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def upload_files(self, files: List[Path]) -> List[Path]:
         self.logger.debug(
-            f"UPLOAD_FILES:Files to upload: {len(files)} files at {self.config.general.sftp.username}@{self.config.general.sftp.host}:{self.config.general.sftp.prefix}/{self.instrument.name}")
+            f"UPLOAD_FILES:Files to upload: {len(files)} files at {self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}")
         if len(files) == 0:
             return []
 
@@ -78,7 +78,7 @@ class JobProcessor:
         uploaded = upload_service.upload_files(
             files, self.instrument.name)
         self.logger.info(
-            f"UPLOAD_FILES:Uploaded files: {len(uploaded)} files at {self.config.general.sftp.username}@{self.config.general.sftp.host}:{self.config.general.sftp.prefix}/{self.instrument.name}")
+            f"UPLOAD_FILES:Uploaded files: {len(uploaded)} files at {self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}")
         return uploaded
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
@@ -101,10 +101,10 @@ class JobProcessor:
         path = Path(file)
         if path.is_absolute():
             return path
-        return Path(self.config.general.input if self.config.general.input else os.getcwd()) / file
+        return Path(self.config.settings.input if self.config.settings.input else os.getcwd()) / file
 
     def _get_destination(self, file: str) -> Path:
         path = Path(file)
         if path.is_absolute():
             return path
-        return Path(self.config.general.output if self.config.general.output else os.getcwd()) / file
+        return Path(self.config.settings.output if self.config.settings.output else os.getcwd()) / file

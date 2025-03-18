@@ -18,7 +18,7 @@ class InstrumentLogger:
     def __init__(self, inst_config: InstrumentConfig):
         self.inst_config = inst_config
         self.logger = logging.getLogger(inst_config.name)
-        default_logs_config = config_service.get_general_config().logs
+        default_logs_config = config_service.get_settings().logs
 
         # Log level
         if inst_config.logs:

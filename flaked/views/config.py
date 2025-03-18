@@ -3,20 +3,20 @@ from fastapi import APIRouter
 from ..services.config import config_service
 from ..services.scheduler import scheduler_service
 from ..services.log import log_service
-from ..models.domain import GeneralConfig, InstrumentConfig
+from ..models.domain import SystemConfig, InstrumentConfig
 import os
 cwd = os.getcwd()
 router = APIRouter()
 
 
-@router.get("/general", response_model_exclude_none=True)
-async def get_general_config() -> GeneralConfig:
-    """Get the general configuration
+@router.get("/settings", response_model_exclude_none=True)
+async def get_settings() -> SystemConfig:
+    """Get the system configuration
 
     Returns:
-        GeneralConfig: The general configuration
+        SystemConfig: The system configuration
     """
-    return config_service.get_config().general
+    return config_service.get_config().settings
 
 
 @router.get("/runtime")

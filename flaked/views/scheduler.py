@@ -63,7 +63,7 @@ async def get_job(job_id: str) -> dict:
     Returns:
         dict: The job information
     """
-    if config_service.get_instrument_config(job_id) is None:
+    if config_service.get_instrument_config(scheduler_service.get_instrument_name(job_id)) is None:
         raise HTTPException(status_code=404, detail="Instrument not found.")
     job = scheduler_service.get_job(job_id)
     if job is not None:
@@ -84,7 +84,7 @@ async def get_job_status(job_id: str) -> Status:
     Returns:
         Status: The job status
     """
-    if config_service.get_instrument_config(job_id) is None:
+    if config_service.get_instrument_config(scheduler_service.get_instrument_name(job_id)) is None:
         raise HTTPException(status_code=404, detail="Instrument not found.")
     if not scheduler_service.has_job(job_id):
         return Status(status="stopped")
@@ -98,7 +98,7 @@ async def get_job_status(job_id: str) -> Status:
 async def run_job(
     job_id: str,
 ) -> Status:
-    if config_service.get_instrument_config(job_id) is None:
+    if config_service.get_instrument_config(scheduler_service.get_instrument_name(job_id)) is None:
         raise HTTPException(status_code=404, detail="Instrument not found.")
     scheduler_service.run_job(job_id)
     return await get_job_status(job_id)
@@ -110,7 +110,7 @@ async def set_job_status(
     action: Action = Query(
         ..., description="Action to perform on the scheduler service: start, stop, pause, or resume.")
 ) -> Status:
-    if config_service.get_instrument_config(job_id) is None:
+    if config_service.get_instrument_config(scheduler_service.get_instrument_name(job_id)) is None:
         raise HTTPException(status_code=404, detail="Instrument not found.")
     if action == Action.start:
         scheduler_service.start_job(job_id)

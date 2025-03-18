@@ -63,9 +63,12 @@ async def get_instrument_config(name: str) -> InstrumentConfig:
         InstrumentConfig: The deleted instrument configuration
     """
     config = config_service.get_instrument_config(name)
-    if scheduler_service.has_job(name):
-        scheduler_service.stop_job(name)
+    # remove all jobs associated with this instrument
+    for job in scheduler_service.get_jobs(name):
+        scheduler_service.stop_job(job["id"])
+    # clear the cached logger for this instrument
     log_service.clear(name)
+    # delete the instrument configuration
     config_service.delete_instrument_config(name)
     return config
 
@@ -80,6 +83,10 @@ async def add_or_update_instrument_config(config: InstrumentConfig) -> Instrumen
     Returns:
         InstrumentConfig: The instrument configuration
     """
+    # add or update the instrument configuration
     config_service.add_or_update_instrument_config(config)
+    # register (or refresh) the jobs for this instrument
+    scheduler_service.add_job(config.name)
+    # clear the cached logger for this instrument
     log_service.clear(config.name)
     return config_service.get_instrument_config(config.name)

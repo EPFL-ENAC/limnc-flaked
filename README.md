@@ -4,8 +4,6 @@ LéXPLORE datalakes (service)
 
 ## Installation
 
-## Installation
-
 Development version:
 
 ```bash
@@ -29,5 +27,9 @@ flaked --help
 Windows deployment, use [nssm](https://nssm.cc/) to make a Service:
 
 ```bash
-nssm
+# preliminary:
+# * install git
+# * install python3
+# * install nssm
+nssm install Flaked flaked
 ```

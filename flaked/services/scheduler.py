@@ -33,6 +33,7 @@ class SchedulerService:
     def stop(self):
         if self.status != "stopped":
             self.scheduler.shutdown()
+            self.scheduler = BackgroundScheduler()  # Reset the scheduler
             self.status = "stopped"
 
     def pause(self):

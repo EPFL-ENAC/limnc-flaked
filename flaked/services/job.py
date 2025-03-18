@@ -8,6 +8,7 @@ import re
 from .config import config_service
 from .log import log_service
 from .upload import UploadService
+from ..models.domain import CommandConfig
 
 
 class JobProcessor:
@@ -43,32 +44,11 @@ class JobProcessor:
             raise
 
     def pre_process(self):
-        if not self.instrument.preprocess:
-            return
-        args = [self.instrument.preprocess.command]
-        if self.instrument.preprocess.args:
-            args.extend(self.instrument.preprocess.args)
-        self.logger.info(
-            f"PRE_PROCESS;Executing command: {' '.join(args)}")
-        process = subprocess.Popen(args)
-        process.wait()
-        self.logger.info(
-            f"PRE_PROCESS;Command executed with return code: {process.returncode}")
+        self._do_process("PRE_PROCESS", self.instrument.preprocess)
 
     def post_process(self):
-        if not self.instrument.postprocess:
-            return
-        args = [self.instrument.postprocess.command]
-        if self.instrument.postprocess.args:
-            args.extend(self.instrument.postprocess.args)
-        self.logger.info(
-            f"POST_PROCESS;Executing command: {' '.join(args)}")
-        process = subprocess.Popen(args)
-        process.wait()
-        self.logger.info(
-            f"POST_PROCESS;Command executed with return code: {process.returncode}")
+        self._do_process("POST_PROCESS", self.instrument.postprocess)
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def read_input_files(self) -> List[Path]:
         self.logger.debug(f"READ_INPUT_FILES;{self.instrument.input.path}")
 
@@ -117,7 +97,6 @@ class JobProcessor:
             f"UPLOAD_FILES:Uploaded files: {len(uploaded)} files at {self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}")
         return uploaded
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def move_files(self, files: List[Path]):
         self.logger.info(
             f"MOVE_FILES;Moving data file to: {self.instrument.output.path}")
@@ -144,3 +123,22 @@ class JobProcessor:
         if path.is_absolute():
             return path
         return Path(self.config.settings.output if self.config.settings.output else os.getcwd()) / file
+
+    def _do_process(self, type: str, command_config: CommandConfig):
+        if not command_config:
+            return
+        args = [command_config.command]
+        if command_config.args:
+            args.extend(command_config.args)
+        self.logger.info(
+            f"{type};Executing command: {' '.join(args)}")
+        process = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process.wait()
+        pstdout, pstderr = process.communicate()
+        if pstdout:
+            self.logger.info(f"{type};{pstdout}")
+        if pstderr:
+            self.logger.error(f"{type};{pstderr}")
+        self.logger.info(
+            f"{type};Command executed with return code: {process.returncode}")

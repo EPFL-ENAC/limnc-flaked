@@ -50,7 +50,7 @@ class JobProcessor:
             args.extend(self.instrument.preprocess.args)
         self.logger.info(
             f"PRE_PROCESS;Executing command: {' '.join(args)}")
-        process = subprocess.Popen(args, shell=True)
+        process = subprocess.Popen(args)
         process.wait()
         self.logger.info(
             f"PRE_PROCESS;Command executed with return code: {process.returncode}")
@@ -63,7 +63,7 @@ class JobProcessor:
             args.extend(self.instrument.postprocess.args)
         self.logger.info(
             f"POST_PROCESS;Executing command: {' '.join(args)}")
-        process = subprocess.Popen(args, shell=True)
+        process = subprocess.Popen(args)
         process.wait()
         self.logger.info(
             f"POST_PROCESS;Command executed with return code: {process.returncode}")

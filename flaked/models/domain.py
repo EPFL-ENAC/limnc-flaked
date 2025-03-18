@@ -60,6 +60,12 @@ class ScheduleConfig(BaseModel):
     interval: Optional[Interval]
 
 
+class CommandConfig(BaseModel):
+    """A command to be executed"""
+    command: str
+    args: List[str] = Field(default=[])
+
+
 class FileFilter(BaseModel):
     # File name pattern
     regex: Optional[str] = Field(default='.*')
@@ -86,6 +92,8 @@ class InstrumentConfig(BaseModel):
     """
     name: str
     schedule: ScheduleConfig
+    preprocess: Optional[CommandConfig] = Field(default=None)
+    postprocess: Optional[CommandConfig] = Field(default=None)
     input: InputConfig
     output: OutputConfig
     logs: Optional[LogsConfig] = Field(default=None)

@@ -1,6 +1,7 @@
 from tenacity import retry, stop_after_attempt, wait_fixed
 from typing import List
 import logging
+import subprocess
 from pathlib import Path
 import os
 import re
@@ -22,15 +23,50 @@ class JobProcessor:
             self.logger = log_service.for_instrument(self.instrument)
             self.logger.debug(f"PROCESS_START;{self.job_id}")
 
+            if self.instrument.preprocess:
+                self.pre_process()
+
             input_files = self.read_input_files()
-            uploaded_files = self.upload_files(input_files)
-            self.move_files(uploaded_files)
+            if len(input_files) > 0:
+                uploaded_files = self.upload_files(input_files)
+                if len(uploaded_files) > 0:
+                    self.move_files(uploaded_files)
+
+            if self.instrument.postprocess:
+                self.post_process()
+
             self.logger.debug("PROCESS_SUCCESS")
         except Exception as e:
             if self.logger:
                 self.logger.debug("PROCESS_FAILURE")
             logging.error("Pipeline failed", exc_info=True)
             raise
+
+    def pre_process(self):
+        if not self.instrument.preprocess:
+            return
+        args = [self.instrument.preprocess.command]
+        if self.instrument.preprocess.args:
+            args.extend(self.instrument.preprocess.args)
+        self.logger.info(
+            f"PRE_PROCESS;Executing command: {' '.join(args)}")
+        process = subprocess.Popen(args)
+        process.wait()
+        self.logger.info(
+            f"PRE_PROCESS;Command executed with return code: {process.returncode}")
+
+    def post_process(self):
+        if not self.instrument.postprocess:
+            return
+        args = [self.instrument.postprocess.command]
+        if self.instrument.postprocess.args:
+            args.extend(self.instrument.postprocess.args)
+        self.logger.info(
+            f"POST_PROCESS;Executing command: {' '.join(args)}")
+        process = subprocess.Popen(args)
+        process.wait()
+        self.logger.info(
+            f"POST_PROCESS;Command executed with return code: {process.returncode}")
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def read_input_files(self) -> List[Path]:

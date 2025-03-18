@@ -16,6 +16,9 @@ instruments:
       interval:
         value: 1
         unit: minutes
+    preprocess:
+      command: "ls"
+      args: ["-la"]
     input:
       path: instrument1/data
       filter:

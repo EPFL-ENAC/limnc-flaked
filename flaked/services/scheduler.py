@@ -100,12 +100,12 @@ class SchedulerService:
             'name': job.name,
             'trigger': {},
             'next_run_time': str(job.next_run_time),
-            'func': job.func.__name__,
-            'args': job.args,
-            'kwargs': job.kwargs,
-            'misfire_grace_time': job.misfire_grace_time,
-            'coalesce': job.coalesce,
-            'max_instances': job.max_instances
+            # 'func': job.func.__name__,
+            # 'args': job.args,
+            # 'kwargs': job.kwargs,
+            # 'misfire_grace_time': job.misfire_grace_time,
+            # 'coalesce': job.coalesce,
+            # 'max_instances': job.max_instances
         }
 
         # Add trigger-specific details

@@ -29,25 +29,34 @@ class InstrumentLogger:
             self.logger.setLevel(logging.INFO)
 
         # Log file path
-        log_path = f"{inst_config.name}.log"
+        self.log_path = f"{inst_config.name}.log"
         if inst_config.logs:
-            log_path = Path(inst_config.logs.path) / f"{inst_config.name}.log"
+            self.log_path = Path(inst_config.logs.path) / \
+                f"{inst_config.name}.log"
         elif default_logs_config:
-            log_path = Path(default_logs_config.path) / \
+            self.log_path = Path(default_logs_config.path) / \
                 f"{inst_config.name}.log"
 
-        if not log_path.parent.exists():
-            log_path.parent.mkdir(parents=True)
+        if not self.log_path.parent.exists():
+            self.log_path.parent.mkdir(parents=True)
 
-        print(f"Logging to {log_path}")
+        print(f"Logging to {self.log_path}")
         handler = RotatingFileHandler(
-            log_path,         # Log file name
+            self.log_path,         # Log file name
             maxBytes=1000000,  # 1 MB before rotation
             backupCount=5      # Keep last 5 log files
         )
         formatter = logging.Formatter('%(asctime)s;%(levelname)s;%(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
+
+    def get_log_path(self) -> Path:
+        """Get the log file path.
+
+        Returns:
+            Path: The log file path
+        """
+        return self.log_path
 
     def debug(self, message: str):
         """Output formatted debug message.

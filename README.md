@@ -27,9 +27,9 @@ flaked --help
 Windows deployment, use [nssm](https://nssm.cc/) to make a Service:
 
 ```bash
-# preliminary:
+# Windows preliminary:
 # * install git
 # * install python3
 # * install nssm
-nssm install Flaked flaked
+nssm install Flaked <path-to-flaked.exe>
 ```

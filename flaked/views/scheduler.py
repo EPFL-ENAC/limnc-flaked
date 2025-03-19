@@ -41,13 +41,16 @@ async def set_status(
 
 
 @router.get("/jobs")
-async def get_jobs() -> list:
+async def get_jobs(name: str = None) -> list:
     """Get the scheduler jobs
+
+    Args:
+        name (str, optional): The name of the job to filter by (optional)
 
     Returns:
         list: The list of jobs
     """
-    return scheduler_service.get_jobs()
+    return scheduler_service.get_jobs(name)
 
 
 @router.get("/job/{job_id}")

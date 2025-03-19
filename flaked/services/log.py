@@ -1,5 +1,7 @@
 
 import logging
+import csv
+import io
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from ..models.domain import InstrumentConfig
@@ -11,6 +13,19 @@ logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s',
 )
+
+
+class CSVFormatter(logging.Formatter):
+    def __init__(self):
+        super().__init__()
+
+    def format(self, record):
+        stringIO = io.StringIO()
+        writer = csv.writer(stringIO, quoting=csv.QUOTE_ALL)
+        row = [self.formatTime(record), record.levelname, record.name]
+        row.extend(record.msg)
+        writer.writerow(row)
+        return stringIO.getvalue().strip()
 
 
 class InstrumentLogger:
@@ -46,8 +61,7 @@ class InstrumentLogger:
             maxBytes=1000000,  # 1 MB before rotation
             backupCount=5      # Keep last 5 log files
         )
-        formatter = logging.Formatter('%(asctime)s;%(levelname)s;%(message)s')
-        handler.setFormatter(formatter)
+        handler.setFormatter(CSVFormatter())
         self.logger.addHandler(handler)
 
     def get_log_path(self) -> Path:
@@ -90,8 +104,10 @@ class InstrumentLogger:
         """
         return self.logger
 
-    def _format(self, message: str) -> str:
-        return f"{self.inst_config.name};{message}"
+    def _format(self, message: str) -> list:
+        if isinstance(message, list):
+            return message
+        return [message]
 
 
 class LogService:

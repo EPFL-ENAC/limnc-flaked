@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/instrument/{name}")
-async def get_instrument_logs(name: str, tail: int = 100) -> InstrumentConfig:
+async def get_instrument_logs(name: str, tail: int = 100) -> StreamingResponse:
     """Get the instrument logs
 
     Args:
@@ -18,7 +18,7 @@ async def get_instrument_logs(name: str, tail: int = 100) -> InstrumentConfig:
         tail (int, optional): The number of lines to tail. Defaults to 100. All lines are returned if tail is not positive.
 
     Returns:
-        str: The instrument logs
+        StreamingResponse: The instrument logs stream
     """
     def file_stream(file_path: str):
         with open(file_path, "rb") as file:

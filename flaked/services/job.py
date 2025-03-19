@@ -22,7 +22,7 @@ class JobProcessor:
             self.config = config_service.get_config()
             self.instrument = config_service.get_instrument_config(self.job_id)
             self.logger = log_service.for_instrument(self.instrument)
-            self.logger.debug(f"PROCESS_START;{self.job_id}")
+            self.logger.debug(["PROCESS_START", self.job_id])
 
             if self.instrument.preprocess:
                 self.pre_process()
@@ -36,10 +36,10 @@ class JobProcessor:
             if self.instrument.postprocess:
                 self.post_process()
 
-            self.logger.debug("PROCESS_SUCCESS")
+            self.logger.debug(["PROCESS_SUCCESS"])
         except Exception as e:
             if self.logger:
-                self.logger.debug("PROCESS_FAILURE")
+                self.logger.debug(["PROCESS_FAILURE", str(e)])
             logging.error("Pipeline failed", exc_info=True)
             raise
 
@@ -50,17 +50,17 @@ class JobProcessor:
         self._do_process("POST_PROCESS", self.instrument.postprocess)
 
     def read_input_files(self) -> List[Path]:
-        self.logger.debug(f"READ_INPUT_FILES;{self.instrument.input.path}")
+        self.logger.debug(["READ_INPUT_FILES", self.instrument.input.path])
 
         # Get folder path
         source = self._get_source(self.instrument.input.path)
         if not source.exists():
             self.logger.info(
-                f"READ_INPUT_FILES;Source folder does not exist: {source}")
+                ["READ_INPUT_FILES", "Source folder does not exist", source])
             return []
         if not source.is_dir():
             self.logger.error(
-                f"READ_INPUT_FILES;Source folder is not a directory: {source}")
+                ["READ_INPUT_FILES", "Source folder is not a directory", source])
             return []
 
         # Define regex pattern (e.g., match .log files starting with "error")
@@ -79,13 +79,14 @@ class JobProcessor:
         if self.instrument.input.filter and self.instrument.input.filter.skip > 0:
             files = files[self.instrument.input.filter.skip:]
 
-        self.logger.info(f"READ_INPUT_FILES;Source files count: {len(files)}")
+        self.logger.info(
+            ["READ_INPUT_FILES", "Source files count", len(files)])
         return files
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def upload_files(self, files: List[Path]) -> List[Path]:
         self.logger.debug(
-            f"UPLOAD_FILES:Files to upload: {len(files)} files at {self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}")
+            ["UPLOAD_FILES", "Files to upload", f"{self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}"])
         if len(files) == 0:
             return []
 
@@ -94,23 +95,23 @@ class JobProcessor:
         uploaded = upload_service.upload_files(
             files, self.instrument.name)
         self.logger.info(
-            f"UPLOAD_FILES:Uploaded files: {len(uploaded)} files at {self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}")
+            ["UPLOAD_FILES", "Uploaded files", f"{self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}"])
         return uploaded
 
     def move_files(self, files: List[Path]):
         self.logger.info(
-            f"MOVE_FILES;Moving data file to: {self.instrument.output.path}")
+            ["MOVE_FILES", "Moving data file", self.instrument.output.path])
         destination = self._get_destination(self.instrument.output.path)
         if destination.exists() and not destination.is_dir():
             self.logger.error(
-                f"MOVE_FILES;Destination is not a directory: {destination}")
+                ["MOVE_FILES", "Destination is not a directory", destination])
             return
 
         if not destination.exists():
             destination.mkdir(parents=True)
         for file in files:
             file.rename(destination / file.name)
-        self.logger.info(f"MOVE_FILES;Files moved: {len(files)}")
+        self.logger.info(["MOVE_FILES", "Files moved", len(files)])
 
     def _get_source(self, file: str) -> Path:
         path = Path(file)
@@ -131,14 +132,14 @@ class JobProcessor:
         if command_config.args:
             args.extend(command_config.args)
         self.logger.info(
-            f"{type};Executing command: {' '.join(args)}")
+            [type, "Executing command", " ".join(args)])
         process = subprocess.Popen(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         process.wait()
         pstdout, pstderr = process.communicate()
         if pstdout:
-            self.logger.info(f"{type};{pstdout}")
+            self.logger.info([type, pstdout])
         if pstderr:
-            self.logger.error(f"{type};{pstderr}")
+            self.logger.error([type, pstderr])
         self.logger.info(
-            f"{type};Command executed with return code: {process.returncode}")
+            [type, "Command executed with return code", process.returncode])

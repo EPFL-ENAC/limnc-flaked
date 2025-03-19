@@ -4,6 +4,7 @@ from logging import basicConfig, INFO, DEBUG
 from pydantic import BaseModel
 from .views.scheduler import router as scheduler_router
 from .views.config import router as config_router
+from .views.logs import router as logs_router
 
 basicConfig(level=DEBUG)
 
@@ -51,4 +52,10 @@ app.include_router(
     config_router,
     prefix="/config",
     tags=["Configuration"],
+)
+
+app.include_router(
+    logs_router,
+    prefix="/logs",
+    tags=["Logs"],
 )

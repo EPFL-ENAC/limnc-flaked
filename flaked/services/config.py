@@ -8,16 +8,27 @@ from ..models.domain import Config, SystemConfig, SFTPConfig, LogsConfig, Instru
 class ConfigService:
 
     def __init__(self):
+        self.config_file = None
         self.load_config()
 
-    def load_config(self):
-        config_path = self._get_data_path() / "config.yml"
-        if not config_path.exists():
-            # Create a default config file
-            default_config = self._make_default_config()
-            with open(config_path, 'w') as f:
-                yaml.dump(default_config.model_dump(), f)
-        self.config_file = str(config_path)
+    def load_config(self, path: Path = None):
+        """Load the configuration from provided file or from standard location
+
+        Args:
+            path (Path, optional): Path to the configuration file. Defaults to None.
+        """
+        if path != None:
+            # Load the config file from the provided path
+            if not path.exists():
+                self._make_default_config_file(path)
+            self.config_file = str(path)
+        elif self.config_file == None:
+            # Load the config file from the default path
+            config_path = self._get_data_path() / "config.yml"
+            if not config_path.exists():
+                self._make_default_config_file(config_path)
+            self.config_file = str(config_path)
+        # Perform config loading
         self.config = None
         with open(self.config_file) as f:
             data = yaml.safe_load(f)
@@ -60,6 +71,12 @@ class ConfigService:
             self.add_instrument_config(instrument)
         else:
             self.update_instrument_config(instrument)
+
+    def _make_default_config_file(self, path: Path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        default_config = self._make_default_config()
+        with open(path, 'w') as f:
+            yaml.dump(default_config.model_dump(), f)
 
     def _make_default_config(self):
         sft_config = SFTPConfig(

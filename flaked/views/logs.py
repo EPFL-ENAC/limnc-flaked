@@ -1,10 +1,12 @@
-from typing import List
 from collections import deque
-from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, BackgroundTasks
+from fastapi.responses import StreamingResponse, FileResponse
+from pathlib import Path
+from zipfile import ZipFile
+import os
+import tempfile
 from ..services.config import config_service
 from ..services.log import InstrumentLogger
-from ..models.domain import InstrumentConfig
 
 router = APIRouter()
 
@@ -41,3 +43,28 @@ async def get_instrument_logs(name: str, tail: int = 100) -> StreamingResponse:
         return StreamingResponse(tail_file(str(file_path), tail) if tail > 0 else file_stream(str(file_path)), media_type="text/plain")
     except FileNotFoundError:
         return StreamingResponse(iter(["File not found"]), status_code=404, media_type="text/plain")
+
+
+@router.get("/instrument/{name}/files")
+async def get_instrument_log_files(name: str, background_tasks: BackgroundTasks) -> FileResponse:
+    """Get the instrument logs files as a zip
+
+    Args:
+        name (str): The instrument name
+
+    Returns:
+        StreamingResponse: The instrument logs stream
+    """
+    instrument = config_service.get_instrument_config(name)
+    log_files = InstrumentLogger(instrument).get_log_paths()
+    # make a zip file from the log files
+    # with tempfile.NamedTemporaryFile() as tmp:
+    #    zip_file = Path(tmp.name)
+    zip_file = Path(f"{name}.zip")
+    with ZipFile(zip_file, "w") as zip:
+        for file in log_files:
+            zip.write(file, file.name)
+    background_tasks.add_task(os.unlink, zip_file)
+    response = FileResponse(
+        zip_file, media_type="application/zip", filename=f"{name}.zip", background=background_tasks)
+    return response

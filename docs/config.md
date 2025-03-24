@@ -166,11 +166,3 @@ Where the logs of the instrument's data processing will be stored, with which le
 | `path`      | Logs directory base path: if not absolute, it will be relative to the main logs directory (if defined) or to the current working directory. |
 | `level`     | Default log level, possible values: `DEBUG`, `INFO`, `WARNING`. |
 
-The format of the log file is CSV (without header) with the columns:
-
-- `timestamp`: datetime of the log entry
-- `level`: the log level of the log entry
-- `instrument`: the instrument name
-- `action`: the type of action that produced the log entry
-- `message`: the human readable message
-- `arguments`: some informative metrics, optional

@@ -20,3 +20,18 @@ For each instrument scheduling directive (`cron` or `interval`) there is a job. 
 | `next_run_time` | When will be the next execution. When the job is paused, there is none.                     |
 
 It is possible to start/stop or pause/resume a job in the scheduler. Stopping removes the job from the scheduler, restarting it recreates the job according to the instrument specifications. Pausing a job postpones its next execution. Resuming it recalculates the next run time according to the job trigger definition.
+
+## Logs
+
+For each instrument it is possible to download the logs. The logs are stored in a rolling file, and by default only the last 100 lines are reported. The log file is rotated when it reaches 1MB. Five log files are kept, the oldest is deleted when a new one is created.
+
+The format of the log file is CSV (without an header) with the columns:
+
+- `timestamp`: datetime of the log entry
+- `level`: the log level of the log entry
+- `instrument`: the instrument name
+- `action`: the type of action that produced the log entry
+- `message`: the human readable message
+- `arguments`: some informative metrics, optional
+
+The logs API allows to download the last lines of the logs of a specific instrument, or all the logs in a zip file.

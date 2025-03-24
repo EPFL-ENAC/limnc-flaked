@@ -1,4 +1,5 @@
 
+from typing import List
 import logging
 import csv
 import io
@@ -71,6 +72,17 @@ class InstrumentLogger:
             Path: The log file path
         """
         return self.log_path
+
+    def get_log_paths(self) -> List[Path]:
+        """Get the log files path.
+
+        Returns:
+            Path: The log files path
+        """
+        base_path = self.log_path
+        files = [base_path] + \
+            [base_path.with_suffix(f".{i}.log") for i in range(1, 5)]
+        return [f for f in files if f.exists()]
 
     def debug(self, message: str):
         """Output formatted debug message.

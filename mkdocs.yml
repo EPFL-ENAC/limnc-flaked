@@ -1,7 +1,9 @@
 site_name: EPFL Flaked
 nav:
   - Home: index.md
-  - Guide: guide.md
+  - Installation: installation.md
+  - Configuration: config.md
+  - API: api.md
 theme:
   name: material
 repo_url: https://github.com/EPFL-ENAC/limnc-flaked

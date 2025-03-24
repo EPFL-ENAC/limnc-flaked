@@ -1,38 +1,4 @@
-# Guide
-
-## Installation
-
-Development version:
-
-```bash
-pip install git+https://github.com/EPFL-ENAC/limnc-flaked.git
-```
-
-Released version:
-
-```bash
-pip install git+https://github.com/EPFL-ENAC/limnc-flaked.git@1.0.0
-```
-
-## Usage
-
-Manual start, see arguments:
-
-```bash
-flaked --help
-```
-
-Windows deployment, use [nssm](https://nssm.cc/) to make a Service:
-
-```bash
-# Windows preliminary:
-# * install git
-# * install python3
-# * install nssm
-nssm install Flaked <path-to-flaked.exe>
-```
-
-## Configuration
+# Configuration
 
 The configuration describes the system settings and a list of instrument descriptions, which specifies how to process the instrument data files. The format of the configuration file is YAML, and the file is named `config.yml`.
 
@@ -80,7 +46,7 @@ instruments:
       level: DEBUG
 ```
 
-### Settings
+## Settings
 
 Some general settings.
 
@@ -91,7 +57,7 @@ Some general settings.
 | `input`     | Input directory settings, optional  |
 | `output`    | Output directory settings, optional |
 
-#### SFTP
+### SFTP
 
 How to connect to the SFTP server where the data will be uploaded.
 
@@ -104,7 +70,7 @@ How to connect to the SFTP server where the data will be uploaded.
 | `username`  | SFTP server username                |
 | `password`  | SFTP server password                |
 
-#### Logs
+### Logs
 
 Where the logs will be stored, with which level of details.
 
@@ -113,23 +79,23 @@ Where the logs will be stored, with which level of details.
 | `path`      | Logs directory base path: if not absolute, it will be relative to the current working directory. |
 | `level`     | Default log level, possible values: `DEBUG`, `INFO`, `WARNING`.                                  |
 
-#### Input
+### Input
 
 | Key         | Description                         |
 | ----------- | ----------------------------------- |
 | `path`      | Input directory path prefix, used if the input directory of an instrument is relative. |
 
-#### Output
+### Output
 
 | Key         | Description                         |
 | ----------- | ----------------------------------- |
 | `path`      | Output directory path prefix, used if the input directory of an instrument is relative. |
 
-### Instruments
+## Instruments
 
 An array of instrument descriptors, that define which and how data are to be handled, at which frequency. 
 
-#### Instrument
+### Instrument
 
 | Key           | Description                         |
 | ------------- | ----------------------------------- |
@@ -141,7 +107,7 @@ An array of instrument descriptors, that define which and how data are to be han
 | `output`      | Output folder where input files will be moved. |
 | `logs`        | Logs  |
 
-##### Schedule
+#### Schedule
 
 There are two kinds of scheduling:
 - `cron`: complex scheduling expression
@@ -155,7 +121,7 @@ One or the other, or both, can be defined for an instrument. The corresponding s
 | `interval.value`  | Interval integer value. |
 | `interval.unit`   | Interval unit, possible values are: `minutes`, `hours`, `days`, `weeks` |
 
-##### Preprocess
+#### Preprocess
 
 A pre-processing directive consists of executing a command, before the input files are handled, with optional arguments.
 
@@ -164,7 +130,7 @@ A pre-processing directive consists of executing a command, before the input fil
 | `command`   | Path to the command to execute.      |
 | `args`      | Array of command arguments, optional |
 
-##### Postprocess
+#### Postprocess
 
 A post-processing directive consists of executing a command, after the output files were handled, with optional arguments.
 
@@ -173,7 +139,7 @@ A post-processing directive consists of executing a command, after the output fi
 | `command`   | Path to the command to execute.      |
 | `args`      | Array of command arguments, optional |
 
-##### Input
+#### Input
 
 Where are located the input data fiels and how to select them.
 
@@ -183,7 +149,7 @@ Where are located the input data fiels and how to select them.
 | `filter.skip`  | The number of files to skip, counting from the latest ones.        |
 | `filter.regex` | A regular expression pattern which file name must match, optional. |
 
-##### Output
+#### Output
 
 In which directory are moved the processed input files.
 
@@ -191,7 +157,7 @@ In which directory are moved the processed input files.
 | ----------- | ----------------------------------- |
 | `path`      | Output directory path               |
 
-##### Logs
+#### Logs
 
 Where the logs of the instrument's data processing will be stored, with which level of details. Note that the ouput of the pre/post-processing commands are included in this log.
 
@@ -208,26 +174,3 @@ The format of the log file is CSV (without header) with the columns:
 - `action`: the type of action that produced the log entry
 - `message`: the human readable message
 - `arguments`: some informative metrics, optional
-
-## API
-
-Flaked is a process that runs in the background. It exposes a REST API so that one can query the current status of the service, and can modify the configuration.
-
-The interactive documentation of the REST API is available at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-
-### Scheduler status
-
-It is possible to start/stop or pause/resume the scheduler.
-
-### Instrument jobs
-
-For each instrument scheduling directive (`cron` or `interval`) ther is a job. Each of this job has the following properties:
-
-| Key             | Description                         |
-| --------------- | ----------------------------------- |
-| `id`            | The job unique identifier, is based on the corresponding instrument's name, postfixed by the scheduling type. |
-| `name`          | The name of the corresponding instrument.                                                   |
-| `trigger`       | The trigger directive, either an interval in seconds or the details of the cron expression. |
-| `next_run_time` | When will be the next execution. When the job is paused, there is none.                     |
-
-It is possible to start/stop or pause/resume a job in the scheduler. Stopping removes the job from the scheduler, restarting it recreates the job according to the instrument specifications. Pausing a job postpones its next execution. Resuming it recalculates the next run time according to the job trigger definition.

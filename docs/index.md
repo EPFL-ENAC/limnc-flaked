@@ -2,4 +2,4 @@
 
 EPFL Flaked is service that uploads LéXPLORE data to EAWAG datalakes repository.
 
-See client side code at [Flake](https://github.com/EPFL-ENAC/limnc-flake).
+See documentation of the client command-line tool at [Flake](https://epfl-enac.github.io/limnc-flake/).

@@ -117,9 +117,9 @@ There are two kinds of scheduling:
 
 One or the other, or both, can be defined for an instrument. The corresponding scheduler job identifier will be postfixed by `:cron` or `:interval`respectively.
 
-| Key         | Description                         |
-| ----------- | ----------------------------------- |
-| `cron`      | Cron expression |
+| Key               | Description                         |
+| ----------------- | ----------------------------------- |
+| `cron`            | Cron expression, see [online cron expression generator](https://crontab.guru/) |
 | `interval.value`  | Interval integer value. |
 | `interval.unit`   | Interval unit, possible values are: `minutes`, `hours`, `days`, `weeks` |
 

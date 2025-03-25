@@ -30,6 +30,7 @@ The format of the log file is CSV (without an header) with the columns:
 - `timestamp`: datetime of the log entry
 - `level`: the log level of the log entry
 - `instrument`: the instrument name
+- `job`: the job identifier
 - `action`: the type of action that produced the log entry
 - `message`: the human readable message
 - `arguments`: some informative metrics, optional

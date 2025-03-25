@@ -9,7 +9,7 @@ def process_data(job_id: str = None):
     """Launch the job processor
 
     Args:
-        job_id (str): The job id is the instrument name
+        job_id (str): The job id is the instrument name with scheduling type
     """
     if job_id:
         processor = JobProcessor(job_id)
@@ -142,7 +142,7 @@ class SchedulerService:
                 if self.scheduler.get_job(job_id):
                     self.scheduler.remove_job(job_id)
                 self.scheduler.add_job(
-                    process_data, trigger, id=job_id, name=instrument.name, kwargs={"job_id": instrument.name}, replace_existing=True)
+                    process_data, trigger, id=job_id, name=instrument.name, kwargs={"job_id": job_id}, replace_existing=True)
 
         if instrument.schedule.cron and not name_or_id.endswith(":interval"):
             trigger = CronTrigger.from_crontab(instrument.schedule.cron)
@@ -150,7 +150,7 @@ class SchedulerService:
             if self.scheduler.get_job(job_id):
                 self.scheduler.remove_job(job_id)
             self.scheduler.add_job(
-                process_data, trigger, id=job_id, name=instrument.name, kwargs={"job_id": instrument.name}, replace_existing=True)
+                process_data, trigger, id=job_id, name=instrument.name, kwargs={"job_id": job_id}, replace_existing=True)
 
     def get_jobs(self, name: str = None) -> list:
         """Get the list of jobs registered in the scheduler

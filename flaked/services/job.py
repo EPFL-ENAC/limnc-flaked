@@ -15,12 +15,14 @@ class JobProcessor:
 
     def __init__(self, job_id: str):
         self.job_id = job_id
+        self.instrument_name = job_id.split(':')[0]
 
     def process(self):
         try:
             logging.info(f"Processing data for job {self.job_id}")
             self.config = config_service.get_config()
-            self.instrument = config_service.get_instrument_config(self.job_id)
+            self.instrument = config_service.get_instrument_config(
+                self.instrument_name)
             self.logger = log_service.for_instrument(self.instrument)
             self.logger.debug(["PROCESS_START", self.job_id])
 

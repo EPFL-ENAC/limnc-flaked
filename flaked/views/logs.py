@@ -4,9 +4,8 @@ from fastapi.responses import StreamingResponse, FileResponse
 from pathlib import Path
 from zipfile import ZipFile
 import os
-import tempfile
 from ..services.config import config_service
-from ..services.log import InstrumentLogger
+from ..services.log import log_service
 
 router = APIRouter()
 
@@ -38,7 +37,7 @@ async def get_instrument_logs(name: str, tail: int = 100) -> StreamingResponse:
             yield b"File not found\n"
 
     instrument = config_service.get_instrument_config(name)
-    file_path = InstrumentLogger(instrument).get_log_path()
+    file_path = log_service.for_instrument(instrument).get_log_path()
     try:
         return StreamingResponse(tail_file(str(file_path), tail) if tail > 0 else file_stream(str(file_path)), media_type="text/plain")
     except FileNotFoundError:
@@ -56,7 +55,7 @@ async def get_instrument_log_files(name: str, background_tasks: BackgroundTasks)
         StreamingResponse: The instrument logs stream
     """
     instrument = config_service.get_instrument_config(name)
-    log_files = InstrumentLogger(instrument).get_log_paths()
+    log_files = log_service.for_instrument(instrument).get_log_paths()
     # make a zip file from the log files
     # with tempfile.NamedTemporaryFile() as tmp:
     #    zip_file = Path(tmp.name)

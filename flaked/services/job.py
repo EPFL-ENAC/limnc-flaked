@@ -118,7 +118,7 @@ class JobProcessor:
         return uploaded
 
     def move_files(self, files: List[Path]):
-        self.logger.info(
+        self.logger.debug(
             [self.job_id, "MOVE_FILES", "Moving data file", self.instrument.output.path])
         destination = self._get_destination(self.instrument.output.path)
         if destination.exists() and not destination.is_dir():

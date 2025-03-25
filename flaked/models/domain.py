@@ -40,24 +40,17 @@ class SystemConfig(BaseModel):
 # Enum for time unit
 
 
-class TimeUnit(str, Enum):
-    minutes = "minutes"
-    hours = "hours"
-    days = "days"
-    weeks = "weeks"
-
-
 class Interval(BaseModel):
     """Sheduler triggering interval
     """
     value: int
-    unit: TimeUnit
+    unit: str  # minutes, hours, days, weeks
 
 
 class ScheduleConfig(BaseModel):
     """Scheduler triggering settings, cron and/or interval based"""
-    cron: Optional[str]
-    interval: Optional[Interval]
+    cron: Optional[str] = Field(default=None)
+    interval: Optional[Interval] = Field(default=None)
 
 
 class CommandConfig(BaseModel):
@@ -71,8 +64,6 @@ class FileFilter(BaseModel):
     regex: Optional[str] = Field(default='.*')
     # Last files to skip
     skip: Optional[int] = Field(default=0)
-    # Minimum age of the files
-    minAge: Optional[Interval] = Field(default=None)
 
 
 class InputConfig(IOConfig):

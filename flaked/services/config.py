@@ -48,13 +48,14 @@ class ConfigService:
 
     def update_config(self, config: Config):
         with open(self.config_file, 'w') as f:
-            yaml.dump(config.model_dump(), f)
+            config_dict = config.model_dump()
+            yaml.dump(config_dict, f)
 
     def update_instrument_config(self, instrument: InstrumentConfig):
-        for inst in self.config.instruments:
-            if inst.name == instrument.name:
-                inst = instrument
-                break
+        instruments = [
+            inst for inst in self.config.instruments if inst.name != instrument.name]
+        instruments.append(instrument)
+        self.config.instruments = instruments
         self.update_config(self.config)
 
     def delete_instrument_config(self, name: str):

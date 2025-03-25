@@ -1,7 +1,7 @@
-from tenacity import retry, stop_after_attempt, wait_fixed
 from typing import List
 import logging
 import subprocess
+import time
 from pathlib import Path
 import os
 import re
@@ -24,7 +24,7 @@ class JobProcessor:
             self.instrument = config_service.get_instrument_config(
                 self.instrument_name)
             self.logger = log_service.for_instrument(self.instrument)
-            self.logger.debug(["PROCESS_START", self.job_id])
+            self.logger.debug([self.job_id, "PROCESS_START"])
 
             if self.instrument.preprocess:
                 self.pre_process()
@@ -38,10 +38,10 @@ class JobProcessor:
             if self.instrument.postprocess:
                 self.post_process()
 
-            self.logger.debug(["PROCESS_SUCCESS"])
+            self.logger.debug([self.job_id, "PROCESS_SUCCESS"])
         except Exception as e:
             if self.logger:
-                self.logger.debug(["PROCESS_FAILURE", str(e)])
+                self.logger.debug([self.job_id, "PROCESS_FAILURE", str(e)])
             logging.error("Pipeline failed", exc_info=True)
             raise
 
@@ -52,17 +52,18 @@ class JobProcessor:
         self._do_process("POST_PROCESS", self.instrument.postprocess)
 
     def read_input_files(self) -> List[Path]:
-        self.logger.debug(["READ_INPUT_FILES", self.instrument.input.path])
+        self.logger.debug([self.job_id, "READ_INPUT_FILES",
+                          self.instrument.input.path])
 
         # Get folder path
         source = self._get_source(self.instrument.input.path)
         if not source.exists():
             self.logger.info(
-                ["READ_INPUT_FILES", "Source folder does not exist", source])
+                [self.job_id, "READ_INPUT_FILES", "Source folder does not exist", source])
             return []
         if not source.is_dir():
             self.logger.error(
-                ["READ_INPUT_FILES", "Source folder is not a directory", source])
+                [self.job_id, "READ_INPUT_FILES", "Source folder is not a directory", source])
             return []
 
         # Define regex pattern (e.g., match .log files starting with "error")
@@ -82,38 +83,55 @@ class JobProcessor:
             files = files[self.instrument.input.filter.skip:]
 
         self.logger.info(
-            ["READ_INPUT_FILES", "Source files count", len(files)])
+            [self.job_id, "READ_INPUT_FILES", "Source files count", len(files)])
         return files
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
     def upload_files(self, files: List[Path]) -> List[Path]:
         self.logger.debug(
-            ["UPLOAD_FILES", "Files to upload", f"{self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}"])
+            [self.job_id, "UPLOAD_FILES", "Files to upload", f"{self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}"])
         if len(files) == 0:
             return []
 
         # Upload files
         upload_service = UploadService()
+        attemps = 0
+        uploaded = []
+        max_attemps = self.config.settings.attempts
+        wait_seconds = self.config.settings.wait
+        while attemps < max_attemps and len(uploaded) == 0:
+            try:
+                uploaded = upload_service.upload_files(
+                    files, self.instrument.name)
+            except Exception as e:
+                attemps += 1
+                self.logger.debug(
+                    [self.job_id, "UPLOAD_FILES", f"Failed to upload files, attempt {attemps}, retrying in {wait_seconds} seconds", str(e)])
+                time.sleep(wait_seconds)
+        if len(uploaded) == 0:
+            self.logger.error(
+                [self.job_id, "UPLOAD_FILES", "Failed to upload files", f"{self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}"])
+            return []
         uploaded = upload_service.upload_files(
             files, self.instrument.name)
         self.logger.info(
-            ["UPLOAD_FILES", "Uploaded files", f"{self.config.settings.sftp.username}@{self.config.settings.sftp.host}:{self.config.settings.sftp.prefix}/{self.instrument.name}"])
+            [self.job_id, "UPLOAD_FILES", "Uploaded files", len(uploaded)])
         return uploaded
 
     def move_files(self, files: List[Path]):
         self.logger.info(
-            ["MOVE_FILES", "Moving data file", self.instrument.output.path])
+            [self.job_id, "MOVE_FILES", "Moving data file", self.instrument.output.path])
         destination = self._get_destination(self.instrument.output.path)
         if destination.exists() and not destination.is_dir():
             self.logger.error(
-                ["MOVE_FILES", "Destination is not a directory", destination])
+                [self.job_id, "MOVE_FILES", "Destination is not a directory", destination])
             return
 
         if not destination.exists():
             destination.mkdir(parents=True)
         for file in files:
             file.rename(destination / file.name)
-        self.logger.info(["MOVE_FILES", "Files moved", len(files)])
+        self.logger.info([self.job_id, "MOVE_FILES",
+                         "Files moved", len(files)])
 
     def _get_source(self, file: str) -> Path:
         path = Path(file)
@@ -134,14 +152,14 @@ class JobProcessor:
         if command_config.args:
             args.extend(command_config.args)
         self.logger.info(
-            [type, "Executing command", " ".join(args)])
+            [self.job_id, type, "Executing command", " ".join(args)])
         process = subprocess.Popen(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         process.wait()
         pstdout, pstderr = process.communicate()
         if pstdout:
-            self.logger.info([type, pstdout])
+            self.logger.info([self.job_id, type, pstdout])
         if pstderr:
-            self.logger.error([type, pstderr])
+            self.logger.error([self.job_id, type, pstderr])
         self.logger.info(
-            [type, "Command executed with return code", process.returncode])
+            [self.job_id, type, "Command executed with return code", process.returncode])

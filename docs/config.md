@@ -56,6 +56,8 @@ Some general settings.
 | `logs`      | Logs settings                       |
 | `input`     | Input directory settings, optional  |
 | `output`    | Output directory settings, optional |
+| `attemps`   | The max number of attempts to try when uploading files, optional, default is `3` |
+| `wait`      | The number of seconds to wait between two attempts when uploading files, optional, default is `5` |
 
 ### SFTP
 

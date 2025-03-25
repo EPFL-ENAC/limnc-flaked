@@ -12,7 +12,6 @@ settings:
 instruments:
   - name: instrument1
     schedule:
-      cron: "0 0 * * *" # every day at midnight
       interval:
         value: 1
         unit: minutes
@@ -28,9 +27,6 @@ instruments:
   - name: instrument2
     schedule:
       cron: "0 0 * * *" # every day at midnight
-      interval:
-        value: 1
-        unit: minutes
     input:
       path: instrument2/data
       filter:

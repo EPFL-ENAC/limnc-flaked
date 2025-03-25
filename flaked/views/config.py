@@ -1,14 +1,25 @@
 from typing import List
-from collections import deque
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
 from ..services.config import config_service
 from ..services.scheduler import scheduler_service
-from ..services.log import log_service, InstrumentLogger
-from ..models.domain import SystemConfig, InstrumentConfig
+from ..services.log import log_service
+from ..models.domain import Config, SystemConfig, InstrumentConfig
 import os
 cwd = os.getcwd()
 router = APIRouter()
+
+
+@router.put("/")
+async def reload() -> Config:
+    """Reload the configuration file, and restart the scheduler.
+
+    Returns:
+        Config: The configuration
+    """
+    scheduler_service.stop()
+    config_service.load_config()
+    scheduler_service.start()
+    return config_service.get_config()
 
 
 @router.get("/settings", response_model_exclude_none=True)
